@@ -1,12 +1,12 @@
 from Updated_NN import NeuralNetwork
+inputs = [[1, 2, 3], [1, 2, 1], [2, 1, 1], [5, 1, 1]]
+outputs = [6, 4, 4, 7]
 model = NeuralNetwork()
-model.add(3, input_layer=True)
+model.add(2, input_layer=True)
 model.add(3)
 model.add(2)
-model.add(1)
+model.add(10)
+model.add(2)
 model.initialize_parameters()
-model.forward_prop([1, 2, 3])
-for x in model.parameters:
-    print(f"W = {x['W']}\nb = {x['b']}")
-for x in model.forward_cache:
-    print(x)
+model.forward_prop()
+model.calculate_gradients()
