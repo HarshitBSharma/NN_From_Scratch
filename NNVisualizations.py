@@ -1,0 +1,192 @@
+from manimlib.imports import *
+
+
+class Neuron(Scene):
+    def construct(self, radius=1):
+        TEXT_COLOR = BLUE_A
+        SCALE_SIZE = 0.75
+        neuron = Circle(color=RED_C, radius=radius)
+
+        nn_input_line = Arrow(4*LEFT, color=YELLOW_D)
+        nn_output_line = Arrow(4*LEFT, color=YELLOW_D)
+        nn_input_line.next_to(neuron, LEFT, buff=0)
+        nn_output_line.next_to(neuron, RIGHT, buff=0)
+        w_and_b = TexMobject('w ', ',', 'b', color=TEXT_COLOR)
+        w_and_b.scale(SCALE_SIZE)
+        activation1 = TexMobject('Activation', color=TEXT_COLOR)
+        activation2 = TexMobject('Function\,\,', 'a', '= g(z)', color=TEXT_COLOR)
+        activation2.next_to(neuron, UP)
+        activation1.next_to(activation2, UP)
+        activation1.scale(SCALE_SIZE)
+        activation2.scale(SCALE_SIZE)
+        input_data = TextMobject('x', color=TEXT_COLOR)
+        input_data.scale(SCALE_SIZE)
+        input_data.next_to(nn_input_line, LEFT)
+        input_data_legend = TextMobject("x: Input Data")
+        input_data_legend.scale(SCALE_SIZE)
+        input_data_legend.to_corner(LEFT+DOWN, buff=0)
+        input_data_updated = TextMobject("x", color=TEXT_COLOR)
+        input_data_updated.next_to(nn_input_line, LEFT)
+        output_data = TexMobject('y\widehat{}', color=TEXT_COLOR)
+        output_data.scale(SCALE_SIZE)
+        '''
+        output_data_legend = TextMobject("a: Output data")
+        output_data_legend.scale(SCALE_SIZE)
+        output_data_legend.to_corner(RIGHT+DOWN, buff=0)
+        '''
+        output_data.next_to(nn_output_line, RIGHT)
+        nn_equation = TexMobject('z = w*x+')
+        nn_equation.scale(SCALE_SIZE)
+        nn_equation.next_to(neuron, DOWN*2)
+        nn_equation_updated = TexMobject('z = {w}_{1}*{x}_{1} + {w}_{2}*{x}_{2} + {w}_{3}*{x}_{3} + b', color=TEXT_COLOR)
+        nn_equation_updated.next_to(neuron, DOWN*2)
+        nn_equation_updated.scale(SCALE_SIZE)
+        nn_equation_updated.shift(RIGHT)
+
+        input1 = Arrow(LEFT*3, color=YELLOW_D)
+        input1.next_to(neuron, LEFT, buff=0)
+        input1.shift((1+(radius/(2**0.5)))*UP)
+        input1.shift((radius / (2 ** 0.5)) * RIGHT)
+        input1.rotate(-PI/6)
+        input1_text = TexMobject("{x}_{1}")
+        input1_text.scale(SCALE_SIZE)
+        input1_text.next_to(input1, UP+LEFT)
+        input1_parameter = TexMobject("{w}_{1}")
+        input1_parameter.scale(SCALE_SIZE)
+        input1_parameter.next_to(input1, UP, buff=0)
+        input1_parameter.shift(0.7*DOWN)
+
+        input2 = Arrow(3*LEFT, color=YELLOW_D)
+        input2.next_to(neuron, LEFT, buff=0)
+        input2_text = TexMobject("{x}_{2}")
+        input2_text.scale(SCALE_SIZE)
+        input2_text.next_to(input2, LEFT)
+        input2_parameter = TexMobject("{w}_{2}")
+        input2_parameter.next_to(input2, UP)
+        input2_parameter.scale(SCALE_SIZE)
+
+        input3 = Arrow(3*LEFT, color=YELLOW_D)
+        input3.next_to(neuron, LEFT, buff=0)
+        input3.shift((1+(radius/(2**0.5)))*DOWN)
+        input3.shift((radius / (2 ** 0.5)) * RIGHT)
+        input3.rotate(PI/6)
+        input3_text = TexMobject("{x}_{3}")
+        input3_text.scale(SCALE_SIZE)
+        input3_text.next_to(input3, DOWN+LEFT)
+        input3_parameter = TexMobject("{w}_{3}")
+        input3_parameter.next_to(input3, UP,  buff=0)
+        input3_parameter.shift(0.7*DOWN)
+        input3_parameter.scale(SCALE_SIZE)
+
+
+        parameters = TexMobject(r"w=\begin{bmatrix}w_{1}\\w_{2}\\ w_{3}\end{bmatrix}")
+        parameters.scale(SCALE_SIZE)
+        parameters.to_edge(DOWN, buff=0)
+        parameters.shift(0.5*LEFT)
+        features = TexMobject(r"x=\begin{bmatrix}x_{1}\\x_{2}\\ x_{3}\end{bmatrix}")
+        features.scale(SCALE_SIZE)
+        features.next_to(parameters, RIGHT)
+        
+
+
+        nn_equation_matrix = TexMobject("z = w^{T}* x + b")
+        nn_equation_matrix.scale(SCALE_SIZE)
+        nn_equation_matrix.next_to(neuron, DOWN * 2 )
+        
+
+        self.play(ShowCreation(neuron))
+
+        self.play(Write(w_and_b))
+        self.play(Write(activation1), Write(activation2))
+        self.play(Write(input_data), GrowArrow(nn_input_line), Write(input_data_legend), run_time=2)
+        self.play(GrowArrow(nn_output_line), Write(output_data), run_time=2)
+        self.play(ApplyMethod(w_and_b[0].next_to, nn_input_line, UP), FadeOut(w_and_b[1]))
+        self.play(Write(nn_equation), ApplyMethod(w_and_b[2].next_to, nn_equation, RIGHT))
+       
+        self.wait(2)
+        self.play(FadeOut(nn_input_line), FadeOut(input_data), FadeOut(w_and_b[0]), )
+        self.play(FadeOut(activation1), FadeOut(activation2[0]), ApplyMethod(activation2[1:].next_to, nn_equation, DOWN*1.5))
+
+        self.play(GrowArrow(input1), Write(input1_text), Write(input1_parameter))
+        self.play(GrowArrow(input2), Write(input2_text), Write(input2_parameter))
+        self.play(GrowArrow(input3),  Write(input3_text), Write(input3_parameter))
+        self.play(Transform(nn_equation, nn_equation_updated), FadeOut(w_and_b[2]))
+        self.play(ApplyMethod(activation2[1:].next_to, nn_output_line, RIGHT), FadeOut(output_data))
+        self.wait(2)
+        self.play(Transform(nn_equation, nn_equation_matrix))
+        self.play(Write(parameters), Write(features))
+        
+        self.wait(2)
+
+
+class NeuralNetworkAnime(Scene):
+    def construct(self):
+        network_mob = NetworkMobject(Network(
+            sizes = [6, 4, 5, 4, 3, 5, 2]
+        ))
+        network_mob.scale(0.8)
+        network_mob.to_edge(UP, buff = MED_SMALL_BUFF)
+        network_mob.shift(RIGHT)
+        edge_update = ContinualEdgeUpdate(
+            network_mob, stroke_width_exp = 1,
+        )
+        self.play(FadeIn(network_mob))
+
+"""
+class NeuralNetwork(Scene):
+    def construct(self):
+        layer_1 = []
+        for i in range(3):
+            neuron = Circle(radius=0.16)
+            layer_1.append(neuron)
+
+        layer_2 = []
+        for i in range(5):
+            neuron = Circle(radius=0.16)
+            layer_2.append(neuron)
+
+        layer_3 = []
+        for i in range(3):
+            neuron = Circle(radius=0.16)
+            layer_3.append(neuron)
+
+
+        neural_network = []
+        neural_network.append(layer_1)
+        neural_network.append(layer_2)
+        neural_network.append(layer_3)
+        print(neural_network)
+        offset_horizontal = 3
+        for layer_id, layer in enumerate(neural_network):
+            offset_vertical = 2
+            for neuron in layer:
+                if layer_id is 0 or layer_id is 2:
+                    neuron.shift(0.5*DOWN)
+                else:
+                    neuron.shift(0.5*UP)
+                neuron.shift(offset_horizontal*LEFT)
+                neuron.shift(DOWN)
+                neuron.shift(offset_vertical*UP)
+                self.add(neuron)
+                offset_vertical -= 1
+            offset_horizontal -= 2
+
+        stroke1 = Line()
+        stroke1.next_to(neural_network[0][0])
+
+        
+        n1 = Circle(radius=0.25)
+        n1.shift(UP*2)
+        n2 = Circle(radius=0.25)
+        n2.shift(UP)
+        n3 = Circle(radius=0.25)
+        n4 = Circle(radius=0.25)
+        n4.shift(DOWN*1)
+        n5 = Circle(radius=0.25)
+        n5.shift(DOWN*2)
+        
+
+
+        #self.play(FadeIn(n1), FadeIn(n2), FadeIn(n3), FadeIn(n4), FadeIn(n5))
+        self.wait(3)
+"""
