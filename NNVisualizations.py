@@ -128,7 +128,7 @@ class Neuron(Scene):
         self.play(GrowArrow(input1), Write(input1_text), Write(input1_parameter))
         self.play(GrowArrow(input2), Write(input2_text), Write(input2_parameter))
         self.play(GrowArrow(input3),  Write(input3_text), Write(input3_parameter))
-        self.wait(10)
+        self.wait(12)
         self.play(Transform(nn_equation, nn_equation_updated), FadeOut(w_and_b[2]))
         self.play(ApplyMethod(activation2[1:].next_to, nn_output_line, RIGHT), FadeOut(output_data))
         self.wait(2)
