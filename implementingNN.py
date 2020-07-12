@@ -1,12 +1,12 @@
+import numpy as np
 from Updated_NN import NeuralNetwork
-inputs = [[1, 2, 3], [1, 2, 1], [2, 1, 1], [5, 1, 1]]
-outputs = [6, 4, 4, 7]
+inputs = np.array([[1, 2, 3, 4], [2, 4, 6, 8]])
+outputs = np.array([3, 6, 9, 12])
 model = NeuralNetwork()
 model.add(2, input_layer=True)
 model.add(3)
-model.add(2)
-model.add(10)
-model.add(2)
+model.add(1)
 model.initialize_parameters()
-model.forward_prop()
-model.calculate_gradients()
+model.forward_prop(inputs)
+model.back_prop(outputs)
+

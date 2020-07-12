@@ -258,6 +258,30 @@ class NetworkSceneZoom(MovingCameraScene):
 
             self.wait(2)
 
+class matrixformation(Scene):
+    def construct(self):
+        parameters = TexMobject(r"w=\begin{bmatrix}w_{1}\\w_{2}\\ w_{3}\end{bmatrix}", color=GREEN_SCREEN)
+        self.add(parameters[:17], parameters[-14])
+        self.wait(2)
+        self.play(Write(parameters))
+        self.wait(2)
+        
+        """matrix = TexMobject("\begin{bmatrix}",
+            "x_{1}^{[1]} & x_{1}^{[2]} & x_{1}^{[3]} & - & - & x_{1}^{[L]} \\",
+            "x_{2}^{[1]} & x_{2}^{[2]} & x_{2}^{[3]} & - & - & x_{1}^{[L]} \\",
+            "x_{3}^{[1]} & x_{3}^{[2]} & x_{3}^{[3]} & - & - & x_{1}^{[L]} \\",
+            "| & | & | & - & - & | \\",
+            "| & | & | & - & - & | \\",
+            "x_{n}^{[1]} & x_{n}^{[2]} & x_{n}^{[3]} & - & - & x_{n}^{[L]}", 
+            "\end{bmatrix}")
+
+        self.add(matrix[0], matrix[-1])
+        self.wait(2)
+        for values in matrix[1:-1]:
+            self.play(Write(values))
+            self.wait(2)"""
+
+
 
 
 """
