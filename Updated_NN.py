@@ -10,13 +10,13 @@ class NeuralNetwork():
     
     def __init__(self):
         self.layers = []
-        self.parameters = []
+        self.parameters = {}
         self.activations = []
         self.input_dims = 0
         self.activations = []
-        self.forward_cache = []
+        self.forward_cache = {}
         self.backward_cache = []
-        self.losses = []
+        self.loss = 0
         self.input_data = []
         self.gradients = []
 
@@ -31,63 +31,70 @@ class NeuralNetwork():
             if i == 0:
                 w_temp = np.random.randn(self.layers[0]['neurons'], self.input_dims)
                 b_temp = np.random.randn(self.layers[0]['neurons'], 1)
-                self.parameters.append({"W": w_temp, "b": b_temp})
             else:
                 w_temp = np.random.randn(self.layers[i]['neurons'], self.layers[i-1]['neurons'])
                 b_temp = np.random.randn(self.layers[i]['neurons'], 1)
-                self.parameters.append({"W": w_temp, "b": b_temp})
+                #self.parameters.append({"W": w_temp, "b": b_temp})
+            self.parameters["W" + str(i)] = w_temp
+            self.parameters["b" + str(i)] = b_temp 
         
  
     def __forward_step(self, W, A_prev, b, activation_function):
         Z_temp = np.dot(W, A_prev) + b
         if activation_function == "relu":
             A_temp = np.array(np.maximum(0, Z_temp))
-        self.forward_cache.append({"Z": Z_temp, "A": A_temp})  
+        #self.forward_cache.append({"Z": Z_temp, "A": A_temp}) 
+        return Z_temp, A_temp
 
         
     def forward_prop(self, input_data):
-        input_data = np.array(input_data)
+        self.input_data = np.array(input_data)
         if input_data.ndim == 1:
             input_data = input_data.reshape(input_data.shape[0], 1)
         if self.input_dims != input_data.shape[0]:
             raise DimensionsMismatchError(self.input_dims, input_data.shape[0])
-        for i, (parameter, layer) in enumerate(zip(self.parameters, self.layers)):
-            W = parameter["W"]
-            b = parameter["b"]
-            activation_function = layer["activation"]
+        n_layers = len(self.layers)
+        for i in range(n_layers):
+            W = self.parameters["W" + str(i)]
+            b = self.parameters["b" + str(i)]
+            activation_function = self.layers[i]["activation"]
             if i == 0:
                 A_prev = input_data
             else:
-                A_prev = self.forward_cache[i-1]["A"]
-            self.__forward_step(W=W, A_prev=A_prev, b=b, activation_function=activation_function)
-
+                A_prev = self.forward_cache["A" + str(i-1)]
+            
+            Z_temp, A_temp = self.__forward_step(W=W, A_prev=A_prev, b=b, activation_function=activation_function)
+            self.forward_cache["Z" + str(i)] = Z_temp
+            self.forward_cache["A" + str(i)] = A_temp
     
     def get_prediction(self):
-        return self.forward_cache[-1]["A"]
+        return self.forward_cache["A" + str(len(self.layers)-1)]
 
 
     def back_prop(self, Y, learning_rate=0.01):
         Y = Y.reshape(self.get_prediction().shape)
-        n_layers= len(self.forward_cache)
-        m = self.forward_cache[n_layers-1]["A"].shape[1]
+        n_layers= len(self.layers)
+        m = self.forward_cache["A" + str(n_layers-1)].shape[1]
         loss, dA_prev = self.__calculate_loss(Y)
+        loss = (1/m)*np.sum(loss)
+        self.loss=loss
         for i in reversed(range(n_layers)):
-            print(f"on iteration {i}")
-            current_cache = self.forward_cache[i]
-            layer_A_prev = self.forward_cache[i]["A"]
-            
-            layer_z = self.forward_cache[i]["Z"]
+            if i != 0:
+                layer_A_prev = self.forward_cache["A" + str(i-1)]
+            else:
+                layer_A_prev = self.input_data
+            layer_z = self.forward_cache["Z" + str(i)]
             layer_activation_function = self.layers[i]["activation"]
             
-            W = self.parameters[i]["W"]
-            b = self.parameters[i]["b"]
+            W = self.parameters["W"+ str(i)]
+            b = self.parameters["b" + str(i)]
             dZ = self.g_prime(dA_prev, layer_activation_function)
-            print(f"dZ shape{dZ.shape}, W shape:{W.shape}, b shape{b.shape}")
-            dA_prev, dW, db = self.__backward_step(dZ, W, b, layer_A_prev)
-            print(f"dA_prev shape{dA_prev.shape} dW shape:{dW.shape} db shape: {db.shape}")
+            
+            dA_prev, dW, db = self.__backward_step(dZ, W, layer_A_prev, b)
+            
             W, b = self.__update_parameters(dW, db, W, b, learning_rate)
-            self.parameters[i]["W"] = W
-            self.parameters[i]["b"] = b 
+            self.parameters["W" + str(i)] = W
+            self.parameters["b" + str(i)] = b 
             
 
     def __calculate_loss(self, Y, loss_fn="mse"):
@@ -106,7 +113,8 @@ class NeuralNetwork():
 
     def __backward_step(self, dZ, W, A_prev, b):
         m = A_prev.shape[1]
-        dW = (1/m) * np.dot(dZ, np.squeeze(A_prev).T)
+        dW = (1/m) * np.dot(dZ, A_prev.T)
+        #print(f"dZ{dZ}\nA_Prev{A_prev} \ndW{dW}")
         db = np.sum(dZ, axis=1, keepdims=True)
         dA_prev = np.dot(W.T, dZ)
         return dA_prev, dW, db

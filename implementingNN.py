@@ -7,6 +7,9 @@ model.add(2, input_layer=True)
 model.add(3)
 model.add(1)
 model.initialize_parameters()
-model.forward_prop(inputs)
-model.back_prop(outputs)
+for i in range(100):
+    model.forward_prop(inputs)
+    model.back_prop(outputs)
+    if i % 20 == 0:
+        print(model.loss)
 
